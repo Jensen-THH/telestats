@@ -14,6 +14,7 @@ VN_TZ = timezone(timedelta(hours=7))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 async def fetch_messages(chat_id: str, offset_date: datetime.datetime, end_date: datetime.datetime, keyword: str,
                          limit: int, img_flag: bool, topic_id: int, fetch_username: bool, from_user: str):
     messages = []
@@ -38,14 +39,15 @@ async def fetch_messages(chat_id: str, offset_date: datetime.datetime, end_date:
                 if end_date_utc and message.date < end_date_utc:
                     break
 
-                username = None
+                user_name = None
                 if fetch_username and message.from_id:
                     try:
                         sender = await message.get_sender()
-                        username = sender.username if sender and sender.username else str(message.from_id.user_id)
+                        user_name = sender.username or str(message.from_id.user_id) if sender else str(message.from_id.user_id)
                     except Exception as e:
-                        logger.warning(f"Lỗi khi lấy sender: {e}")
-                
+                        logger.warning(f"Lỗi khi lấy sender cho message {message.id}: {e}")
+                        user_name = str(message.from_id.user_id)  # Dự phòng bằng user_id
+
                 reactions = {}
                 if message.reactions and message.reactions.results:
                     for reaction in message.reactions.results:
@@ -77,7 +79,8 @@ async def fetch_messages(chat_id: str, offset_date: datetime.datetime, end_date:
                     "total_reactions": total_reactions,
                     "message_link": f"https://t.me/{chat_id}/{message.id}",
                     "media_base64": media_base64,
-                    "user_name": username if fetch_username else (from_user if from_user else None),
+                    "user_name": user_name,
+                    "user_id": message.from_id.user_id,
                     "reply_to_msg_id": message.reply_to.reply_to_msg_id if message.reply_to else None,
                     "reply_to_top_id": message.reply_to.reply_to_top_id if message.reply_to else None,
                     "forum_topic": message.reply_to.forum_topic if message.reply_to else None,
