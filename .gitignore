@@ -24,4 +24,5 @@ ENV/
 *.sqlite3
 dev.py
 *.session
+*.session-journal
 
