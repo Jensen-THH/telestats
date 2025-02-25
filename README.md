@@ -8,6 +8,8 @@ Dự án này là một API được xây dựng bằng FastAPI, cho phép ngư�
 - [Cài đặt](#cài-đặt)
 - [Sử dụng](#sử-dụng)
 - [API](#api)
+- [Telethon](#telethon)
+- [Tài liệu](#tài-liệu)
 - [Cảm ơn](#cảm-ơn)
 
 ## Giới thiệu
@@ -99,6 +101,14 @@ API sẽ chạy trên `http://localhost:8000`.
 ```
 GET /api/get_messages/?chat_id=123456&limit=50
 ```
+
+## Telethon
+
+Dự án sử dụng [Telethon](https://docs.telethon.dev/en/latest/) - một thư viện Python để tương tác với Telegram API. Telethon cho phép bạn dễ dàng lấy dữ liệu từ Telegram và thực hiện các hành động như gửi tin nhắn, lấy thông tin người dùng, và nhiều hơn nữa.
+
+## Tài liệu
+
+Tài liệu chi tiết về API có thể được tìm thấy tại [FastAPI Documentation](https://fastapi.tiangolo.com/) và [Telethon Documentation](https://docs.telethon.dev/en/latest/).
 
 ## Cảm ơn
 
