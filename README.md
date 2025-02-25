@@ -57,6 +57,23 @@ Telegram Statistics API cho phép bạn lấy thông tin từ các cuộc trò c
    SESSION_NAME=your_session_name
    ```
 
+## Cấu trúc thư mục
+
+Dưới đây là cấu trúc thư mục của dự án:
+
+```
+telegram-statistics-api/
+│
+├── app/
+│   ├── main.py
+│   ├── routers/
+│   └── models/
+│
+├── requirements.txt
+├── start.sh
+└── .env
+```
+
 ## Sử dụng
 
 Để chạy API, bạn có thể sử dụng một trong hai cách sau:
