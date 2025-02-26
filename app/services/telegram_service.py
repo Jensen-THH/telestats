@@ -1,5 +1,5 @@
 import telethon
-from telethon.tl.types import Message, ReactionEmoji, ReactionCustomEmoji
+from telethon.tl.types import Message, ReactionEmoji, ReactionCustomEmoji, PeerUser, PeerChannel, PeerChat
 from app.telegram_client import client
 from app.database import messages_collection
 import datetime
@@ -40,13 +40,32 @@ async def fetch_messages(chat_id: str, offset_date: datetime.datetime, end_date:
                     break
 
                 user_name = None
+                user_id = None
                 if fetch_username and message.from_id:
                     try:
                         sender = await message.get_sender()
                         user_name = sender.username or str(message.from_id.user_id) if sender else str(message.from_id.user_id)
                     except Exception as e:
                         logger.warning(f"Lỗi khi lấy sender cho message {message.id}: {e}")
-                        user_name = str(message.from_id.user_id)  # Dự phòng bằng user_id
+                        # Xử lý user_id dựa trên loại Peer
+                        if isinstance(message.from_id, PeerUser):
+                            user_id = message.from_id.user_id
+                            user_name = str(user_id)  # Dự phòng bằng user_id
+                        elif isinstance(message.from_id, PeerChannel):
+                            user_id = message.from_id.channel_id  # Dùng channel_id cho kênh
+                            user_name = f"Channel_{user_id}"
+                        elif isinstance(message.from_id, PeerChat):
+                            user_id = message.from_id.chat_id  # Dùng chat_id cho nhóm
+                            user_name = f"Chat_{user_id}"
+                else:
+                    # Lấy user_id mà không cần fetch sender
+                    if isinstance(message.from_id, PeerUser):
+                        user_id = message.from_id.user_id
+                    elif isinstance(message.from_id, PeerChannel):
+                        user_id = message.from_id.channel_id
+                    elif isinstance(message.from_id, PeerChat):
+                        user_id = message.from_id.chat_id
+                    user_name = from_user if from_user else (str(user_id) if user_id else None)
 
                 reactions = {}
                 if message.reactions and message.reactions.results:
@@ -80,7 +99,7 @@ async def fetch_messages(chat_id: str, offset_date: datetime.datetime, end_date:
                     "message_link": f"https://t.me/{chat_id}/{message.id}",
                     "media_base64": media_base64,
                     "user_name": user_name,
-                    "user_id": message.from_id.user_id,
+                    "user_id": user_id,
                     "reply_to_msg_id": message.reply_to.reply_to_msg_id if message.reply_to else None,
                     "reply_to_top_id": message.reply_to.reply_to_top_id if message.reply_to else None,
                     "forum_topic": message.reply_to.forum_topic if message.reply_to else None,
