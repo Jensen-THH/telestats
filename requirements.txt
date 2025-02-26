@@ -3,4 +3,5 @@ uvicorn
 telethon
 pymongo
 python-dotenv
+pytz
 fastapi[all]
