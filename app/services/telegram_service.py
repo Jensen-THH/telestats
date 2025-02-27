@@ -1,5 +1,5 @@
 import telethon
-from telethon.tl.types import Message, ReactionEmoji, ReactionCustomEmoji, PeerUser, PeerChannel, PeerChat
+from telethon.tl.types import Message, ReactionEmoji, ReactionCustomEmoji, PeerUser, PeerChannel, PeerChat, ReactionPaid
 from app.telegram_client import client
 from app.database import messages_collection
 import datetime
@@ -47,18 +47,16 @@ async def fetch_messages(chat_id: str, offset_date: datetime.datetime, end_date:
                         user_name = sender.username or str(message.from_id.user_id) if sender else str(message.from_id.user_id)
                     except Exception as e:
                         logger.warning(f"Lỗi khi lấy sender cho message {message.id}: {e}")
-                        # Xử lý user_id dựa trên loại Peer
                         if isinstance(message.from_id, PeerUser):
                             user_id = message.from_id.user_id
-                            user_name = str(user_id)  # Dự phòng bằng user_id
+                            user_name = str(user_id)
                         elif isinstance(message.from_id, PeerChannel):
-                            user_id = message.from_id.channel_id  # Dùng channel_id cho kênh
+                            user_id = message.from_id.channel_id
                             user_name = f"Channel_{user_id}"
                         elif isinstance(message.from_id, PeerChat):
-                            user_id = message.from_id.chat_id  # Dùng chat_id cho nhóm
+                            user_id = message.from_id.chat_id
                             user_name = f"Chat_{user_id}"
                 else:
-                    # Lấy user_id mà không cần fetch sender
                     if isinstance(message.from_id, PeerUser):
                         user_id = message.from_id.user_id
                     elif isinstance(message.from_id, PeerChannel):
@@ -70,8 +68,14 @@ async def fetch_messages(chat_id: str, offset_date: datetime.datetime, end_date:
                 reactions = {}
                 if message.reactions and message.reactions.results:
                     for reaction in message.reactions.results:
-                        key = (reaction.reaction.emoticon if isinstance(reaction.reaction, ReactionEmoji)
-                               else f"CustomEmoji_{reaction.reaction.document_id}")
+                        if isinstance(reaction.reaction, ReactionEmoji):
+                            key = reaction.reaction.emoticon
+                        elif isinstance(reaction.reaction, ReactionCustomEmoji):
+                            key = f"CustomEmoji_{reaction.reaction.document_id}"
+                        elif isinstance(reaction.reaction, ReactionPaid):
+                            key = "PaidReaction"
+                        else:
+                            key = str(reaction.reaction)
                         reactions[key] = reaction.count
 
                 total_reactions = (message.views or 0) + sum(reactions.values())
