@@ -1,7 +1,11 @@
-from fastapi import APIRouter, Query
+from typing import Any
+from fastapi import APIRouter, Body, Query
 from datetime import datetime, timezone
 import pytz
 from app.services.telegram_service import fetch_messages
+from app.services.message_service import get_messages_from_db
+from app.services.message_service import delete_messages_by_id
+from app.services.message_service import delete_messages_by_ids
 
 router = APIRouter()
 
@@ -34,3 +38,25 @@ async def get_messages(
     result = await fetch_messages(chat_id, offset_date, end_date, keyword, limit, img_flag, topic_id, fetch_username, from_user)
 
     return result
+
+@router.post("/get_messages_db/")
+async def get_messages_db(payload: Any = Body(None)):
+    filter_query = payload.get("filter_query")
+    sort_by = payload.get("sort_by")
+    limit = payload.get("limit")
+    page = payload.get("page")
+    perPage = payload.get("perPage")
+    result = await get_messages_from_db(filter_query, sort_by, limit, page, perPage)
+    return result
+
+@router.delete("/delete_messages/{message_id}")
+async def delete_messages(message_id: str):
+    result = await delete_messages_by_id(message_id)
+    return result
+
+@router.post("/delete_many_messages/")
+async def delete_many_messages(payload: Any = Body(None)):
+    message_ids = payload.get("message_ids")
+    result = await delete_messages_by_ids(message_ids)
+    return result
+
