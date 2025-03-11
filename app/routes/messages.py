@@ -6,7 +6,7 @@ from app.services.telegram_service import fetch_messages
 from app.services.message_service import get_messages_from_db
 from app.services.message_service import delete_messages_by_id
 from app.services.message_service import delete_messages_by_ids
-
+from typing import Optional
 router = APIRouter()
 
 # Định nghĩa múi giờ Việt Nam (UTC+7)
@@ -41,12 +41,12 @@ async def get_messages(
 
 @router.post("/get_messages_db/")
 async def get_messages_db(payload: Any = Body(None)):
-    filter_query = payload.get("filter_query")
+    filterQuery = payload.get("filterQuery")
     sort_by = payload.get("sort_by")
     limit = payload.get("limit")
     page = payload.get("page")
     perPage = payload.get("perPage")
-    result = await get_messages_from_db(filter_query, sort_by, limit, page, perPage)
+    result = await get_messages_from_db(filterQuery, sort_by, limit, page, perPage)
     return result
 
 @router.delete("/delete_messages/{message_id}")
@@ -60,3 +60,12 @@ async def delete_many_messages(payload: Any = Body(None)):
     result = await delete_messages_by_ids(message_ids)
     return result
 
+@router.post("/messages_db/")
+async def get_messages_db(request: Any = Body(None)):
+    return await get_messages_from_db(
+        page=request.get("page"),
+        perPage=request.get("perPage"),
+        filterQuery=request.get("filterQuery"),
+        sort_by=request.get("sort_by"),
+        limit=request.get("limit"),
+    )
