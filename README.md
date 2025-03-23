@@ -112,7 +112,7 @@ API sẽ chạy trên `http://localhost:8000`.
   - `topic_id`: ID chủ đề (tùy chọn).
   - `fetch_username`: Cờ để lấy tên người dùng (mặc định: False).
   - `from_user`: ID người gửi (tùy chọn).
-
+  - `channel_id`: ID group, user or channel
 ### Ví dụ
 
 ```
