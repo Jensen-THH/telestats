@@ -1,7 +1,4 @@
 from app.database import messages_collection
-from typing import Optional
-from fastapi import Query
-
 from bson import ObjectId
 from pymongo.errors import PyMongoError
 from app.utils.helper import convert_objectid
